@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@keyframes node-visited {
+  0%   { transform: scale(0.2); border-radius: 50%;  background-color: #a78bfa; }
+  50%  { transform: scale(1.2); border-radius: 25%;  background-color: #7c3aed; }
+  100% { transform: scale(1.0); border-radius: 2px;  background-color: #7c3aed; }
+}
+
+@keyframes node-path {
+  0%   { transform: scale(0.4); background-color: #fde68a; }
+  60%  { transform: scale(1.15); }
+  100% { transform: scale(1.0); background-color: #fde047; }
+}
+
+@keyframes node-wall {
+  0%   { transform: scale(0.5); }
+  80%  { transform: scale(1.05); }
+  100% { transform: scale(1.0); }
+}
+
+.node-visited { animation: node-visited 0.35s ease-out forwards; }
+.node-path    { animation: node-path    0.3s  ease-out forwards; }
+.node-wall    { animation: node-wall    0.12s ease-out forwards; }
