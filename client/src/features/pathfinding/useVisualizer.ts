@@ -12,8 +12,10 @@ import {
   setStats,
   markVisited,
   markPath,
+  storeRunResult,
 } from './pathfindingSlice';
 import { SPEED_DELAY_MS } from './types';
+import { saveRun } from '@/services/api';
 
 export function useVisualizer() {
   const dispatch  = useAppDispatch();
@@ -40,6 +42,9 @@ export function useVisualizer() {
 
     const { grid } = store.getState().pathfinding;
 
+    // Snapshot the clean grid (walls/weights only) for playback seeking
+    const baseGrid = grid.map(row => row.map(node => ({ ...node })));
+
     const result =
       algorithm === 'bfs'      ? bfs(grid, startNode, endNode)      :
       algorithm === 'dfs'      ? dfs(grid, startNode, endNode)      :
@@ -49,6 +54,7 @@ export function useVisualizer() {
     const { visitedOrder, path } = result;
     const visitDelay = SPEED_DELAY_MS[speed];
     const pathDelay  = visitDelay * 2.5;
+    const startTime  = Date.now();
 
     dispatch(setRunning(true));
 
@@ -60,6 +66,7 @@ export function useVisualizer() {
     const phaseTwo = visitedOrder.length * visitDelay;
 
     const finish = () => {
+      const durationMs = Date.now() - startTime;
       dispatch(setRunning(false));
       dispatch(setFinished(true));
       dispatch(setStats({
@@ -68,6 +75,19 @@ export function useVisualizer() {
         pathLength: result.found ? path.length + 2 : 0,
         found: result.found,
       }));
+      dispatch(storeRunResult({
+        visitedOrder,
+        pathPositions: result.found ? path : [],
+        baseGrid,
+      }));
+      saveRun({
+        type: 'pathfinding',
+        algorithm,
+        durationMs,
+        nodesVisited: visitedOrder.length,
+        pathLength: result.found ? path.length + 2 : 0,
+        pathFound: result.found,
+      });
       if (!result.found) onNoPath?.();
     };
 

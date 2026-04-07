@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { SortingBars }     from '@/components/Sorting/SortingBars';
 import { SortingControls } from '@/components/Sorting/SortingControls';
+import { PlaybackBar }     from '@/components/UI/PlaybackBar';
 import { useSorter }        from '@/features/sorting/useSorter';
+import { usePlayback }      from '@/hooks/usePlayback';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { shuffleBars }      from '@/features/sorting/sortingSlice';
-import { BAR_COUNT, BAR_MIN, BAR_MAX } from '@/features/sorting/types';
+import { shuffleBars, seekToFrame } from '@/features/sorting/sortingSlice';
+import { BAR_COUNT, BAR_MIN, BAR_MAX, SORT_SPEED_MS } from '@/features/sorting/types';
 
 function makeRandomValues() {
   return Array.from({ length: BAR_COUNT }, () =>
@@ -13,9 +15,21 @@ function makeRandomValues() {
 }
 
 export default function SortingPage() {
-  const dispatch     = useAppDispatch();
-  const isComplete   = useAppSelector((s) => s.sorting.isComplete);
+  const dispatch    = useAppDispatch();
+  const isComplete  = useAppSelector((s) => s.sorting.isComplete);
+  const isRunning   = useAppSelector((s) => s.sorting.isRunning);
+  const frames      = useAppSelector((s) => s.sorting.frames);
+  const speed       = useAppSelector((s) => s.sorting.speed);
   const { sort, stop } = useSorter();
+
+  const totalFrames  = frames?.length ?? 0;
+  const showPlayback = isComplete && !isRunning && totalFrames > 0;
+
+  const playback = usePlayback(
+    showPlayback ? totalFrames : 0,
+    (f) => { if (showPlayback) dispatch(seekToFrame(f)); },
+    SORT_SPEED_MS[speed],
+  );
 
   function handleShuffle() {
     dispatch(shuffleBars(makeRandomValues()));
@@ -61,6 +75,21 @@ export default function SortingPage() {
           </p>
         )}
       </main>
+
+      {showPlayback && (
+        <PlaybackBar
+          frame={playback.frame}
+          total={totalFrames}
+          isPlaying={playback.isPlaying}
+          onFirst={playback.toStart}
+          onStepBack={playback.stepBack}
+          onReplay={playback.replay}
+          onPlayPause={playback.isPlaying ? playback.pause : playback.play}
+          onStepFwd={playback.stepFwd}
+          onLast={playback.toEnd}
+          onSeek={playback.seek}
+        />
+      )}
     </div>
   );
 }

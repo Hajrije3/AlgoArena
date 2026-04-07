@@ -4,8 +4,9 @@ import { bubbleSort }    from './algorithms/bubbleSort';
 import { selectionSort } from './algorithms/selectionSort';
 import { insertionSort } from './algorithms/insertionSort';
 import { mergeSort }     from './algorithms/mergeSort';
-import { applyFrame, setRunning, setComplete } from './sortingSlice';
+import { applyFrame, setRunning, setComplete, storeFrames } from './sortingSlice';
 import { SORT_SPEED_MS } from './types';
+import { saveRun } from '@/services/api';
 
 export function useSorter() {
   const dispatch   = useAppDispatch();
@@ -38,6 +39,9 @@ export function useSorter() {
                                   mergeSort(values);
 
     const delay = SORT_SPEED_MS[speed];
+    const startTime = Date.now();
+    const comparisons = frames.filter((f) => f.comparing.length > 0).length;
+    const swaps = frames.filter((f) => f.swapping.length > 0).length;
 
     dispatch(setRunning(true));
     dispatch(setComplete(false));
@@ -49,6 +53,15 @@ export function useSorter() {
         if (i === frames.length - 1) {
           dispatch(setRunning(false));
           dispatch(setComplete(true));
+          dispatch(storeFrames(frames));
+          saveRun({
+            type: 'sorting',
+            algorithm,
+            durationMs: Date.now() - startTime,
+            comparisons,
+            swaps,
+            arraySize: values.length,
+          });
         }
       }, i * delay);
 

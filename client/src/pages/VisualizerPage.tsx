@@ -3,14 +3,33 @@ import Grid          from '@/components/Grid/Grid';
 import ControlsPanel from '@/components/Controls/ControlsPanel';
 import { StatsBar }  from '@/components/UI/StatsBar';
 import { Toast }     from '@/components/UI/Toast';
+import { PlaybackBar } from '@/components/UI/PlaybackBar';
 import { useVisualizer }   from '@/features/pathfinding/useVisualizer';
 import { useMazeGenerator } from '@/features/pathfinding/useMazeGenerator';
 import { useToast }         from '@/hooks/useToast';
+import { usePlayback }      from '@/hooks/usePlayback';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { seekToFrame } from '@/features/pathfinding/pathfindingSlice';
+import { SPEED_DELAY_MS } from '@/features/pathfinding/types';
 
 export default function VisualizerPage() {
+  const dispatch = useAppDispatch();
   const { run, stop }    = useVisualizer();
   const { generateMaze } = useMazeGenerator();
   const { toasts, showToast, dismiss } = useToast();
+
+  const isFinished   = useAppSelector((s) => s.pathfinding.isFinished);
+  const isRunning    = useAppSelector((s) => s.pathfinding.isRunning);
+  const totalFrames  = useAppSelector((s) => s.pathfinding.totalFrames);
+  const speed        = useAppSelector((s) => s.pathfinding.speed);
+
+  const showPlayback = isFinished && !isRunning && totalFrames > 0;
+
+  const playback = usePlayback(
+    showPlayback ? totalFrames : 0,
+    (f) => { if (showPlayback) dispatch(seekToFrame(f)); },
+    SPEED_DELAY_MS[speed],
+  );
 
   function handleVisualize() {
     run(() => showToast('No path found — the end node is unreachable.', 'error'));
@@ -40,6 +59,21 @@ export default function VisualizerPage() {
       <main className="flex-1 flex items-center justify-center p-6 overflow-auto">
         <Grid />
       </main>
+
+      {showPlayback && (
+        <PlaybackBar
+          frame={playback.frame}
+          total={totalFrames}
+          isPlaying={playback.isPlaying}
+          onFirst={playback.toStart}
+          onStepBack={playback.stepBack}
+          onReplay={playback.replay}
+          onPlayPause={playback.isPlaying ? playback.pause : playback.play}
+          onStepFwd={playback.stepFwd}
+          onLast={playback.toEnd}
+          onSeek={playback.seek}
+        />
+      )}
 
       <Toast toasts={toasts} onDismiss={dismiss} />
     </div>

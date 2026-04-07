@@ -13,6 +13,9 @@ interface SortingState {
   isRunning: boolean;
   isComplete: boolean;
   barCount:  number;
+  // Playback
+  frames: AnimFrame[] | null;
+  currentFrame: number;
 }
 
 function generateValues(count: number): number[] {
@@ -31,6 +34,8 @@ const initialState: SortingState = {
   isRunning:  false,
   isComplete: false,
   barCount:   BAR_COUNT,
+  frames:     null,
+  currentFrame: 0,
 };
 
 const sortingSlice = createSlice({
@@ -44,6 +49,8 @@ const sortingSlice = createSlice({
       state.sorted    = [];
       state.isRunning  = false;
       state.isComplete = false;
+      state.frames     = null;
+      state.currentFrame = 0;
     },
 
     applyFrame(state, action: PayloadAction<AnimFrame>) {
@@ -64,10 +71,31 @@ const sortingSlice = createSlice({
 
     setRunning(state, action: PayloadAction<boolean>) {
       state.isRunning = action.payload;
+      if (action.payload) {
+        // Clear playback state when a new run starts
+        state.frames = null;
+        state.currentFrame = 0;
+      }
     },
 
     setComplete(state, action: PayloadAction<boolean>) {
       state.isComplete = action.payload;
+    },
+
+    storeFrames(state, action: PayloadAction<AnimFrame[]>) {
+      state.frames = action.payload;
+      state.currentFrame = action.payload.length - 1;
+    },
+
+    seekToFrame(state, action: PayloadAction<number>) {
+      if (!state.frames) return;
+      const f = Math.max(0, Math.min(action.payload, state.frames.length - 1));
+      state.currentFrame = f;
+      const frame = state.frames[f];
+      state.values    = frame.values;
+      state.comparing = frame.comparing;
+      state.swapping  = frame.swapping;
+      state.sorted    = frame.sorted;
     },
   },
 });
@@ -79,6 +107,8 @@ export const {
   setSpeed,
   setRunning,
   setComplete,
+  storeFrames,
+  seekToFrame,
 } = sortingSlice.actions;
 
 export default sortingSlice.reducer;

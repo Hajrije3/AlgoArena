@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(node --check src/index.js)",
+      "Bash(node --check src/config/db.js)",
+      "Bash(node --check src/models/User.js)",
+      "Bash(node --check src/models/Run.js)",
+      "Bash(node --check src/middleware/auth.js)",
+      "Bash(timeout 15 node -e ':*)"
     ]
   }
 }

@@ -16,6 +16,12 @@ interface PathfindingState {
   stats: RunStats | null;
   rows: number;
   cols: number;
+  // Playback
+  visitedOrder: Position[] | null;
+  pathPositions: Position[] | null;
+  baseGrid: GridNode[][] | null;
+  currentFrame: number;
+  totalFrames: number;
 }
 
 const initialState: PathfindingState = {
@@ -31,6 +37,11 @@ const initialState: PathfindingState = {
   stats: null,
   rows: ROWS,
   cols: COLS,
+  visitedOrder: null,
+  pathPositions: null,
+  baseGrid: null,
+  currentFrame: 0,
+  totalFrames: 0,
 };
 
 const pathfindingSlice = createSlice({
@@ -142,6 +153,11 @@ const pathfindingSlice = createSlice({
       state.isRunning = false;
       state.isFinished = false;
       state.stats = null;
+      state.visitedOrder = null;
+      state.pathPositions = null;
+      state.baseGrid = null;
+      state.currentFrame = 0;
+      state.totalFrames = 0;
     },
 
     resetBoard(state) {
@@ -149,6 +165,54 @@ const pathfindingSlice = createSlice({
       state.isRunning = false;
       state.isFinished = false;
       state.stats = null;
+      state.visitedOrder = null;
+      state.pathPositions = null;
+      state.baseGrid = null;
+      state.currentFrame = 0;
+      state.totalFrames = 0;
+    },
+
+    storeRunResult(
+      state,
+      action: PayloadAction<{
+        visitedOrder: Position[];
+        pathPositions: Position[];
+        baseGrid: GridNode[][];
+      }>
+    ) {
+      const { visitedOrder, pathPositions, baseGrid } = action.payload;
+      state.visitedOrder = visitedOrder;
+      state.pathPositions = pathPositions;
+      state.baseGrid = baseGrid;
+      state.totalFrames = visitedOrder.length + pathPositions.length;
+      state.currentFrame = state.totalFrames - 1;
+    },
+
+    seekToFrame(state, action: PayloadAction<number>) {
+      if (!state.baseGrid || !state.visitedOrder || !state.pathPositions) return;
+      const f = Math.max(0, Math.min(action.payload, state.totalFrames - 1));
+      state.currentFrame = f;
+
+      // Rebuild grid from snapshot
+      state.grid = state.baseGrid.map(row => row.map(node => ({ ...node })));
+
+      // Apply visited nodes
+      const vCount = Math.min(f + 1, state.visitedOrder.length);
+      for (let i = 0; i < vCount; i++) {
+        const { row, col } = state.visitedOrder[i];
+        const node = state.grid[row][col];
+        if (node.type !== 'start' && node.type !== 'end') node.type = 'visited';
+      }
+
+      // Apply path nodes (only after all visited nodes are shown)
+      if (f >= state.visitedOrder.length) {
+        const pCount = f - state.visitedOrder.length + 1;
+        for (let i = 0; i < Math.min(pCount, state.pathPositions.length); i++) {
+          const { row, col } = state.pathPositions[i];
+          const node = state.grid[row][col];
+          if (node.type !== 'start' && node.type !== 'end') node.type = 'path';
+        }
+      }
     },
   },
 });
@@ -171,6 +235,8 @@ export const {
   clearWalls,
   resetVisualization,
   resetBoard,
+  storeRunResult,
+  seekToFrame,
 } = pathfindingSlice.actions;
 
 export default pathfindingSlice.reducer;
