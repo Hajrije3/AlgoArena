@@ -113,46 +113,66 @@ export function SortingStepPanel() {
   );
 }
 
-// ─── Pathfinding slim bar ─────────────────────────────────────────────────────
+// ─── Pathfinding panel ────────────────────────────────────────────────────────
 
 const ALGO_LABEL: Record<AlgorithmType, string> = {
   bfs: 'BFS', dfs: 'DFS', dijkstra: "Dijkstra's",
 };
 
-export function PathfindingStepDescription() {
+export function PathfindingStepPanel() {
   const visitedOrder  = useAppSelector((s) => s.pathfinding.visitedOrder);
   const pathPositions = useAppSelector((s) => s.pathfinding.pathPositions);
   const currentFrame  = useAppSelector((s) => s.pathfinding.currentFrame);
+  const totalFrames   = useAppSelector((s) => s.pathfinding.totalFrames);
   const algorithm     = useAppSelector((s) => s.pathfinding.algorithm);
   const isRunning     = useAppSelector((s) => s.pathfinding.isRunning);
   const isFinished    = useAppSelector((s) => s.pathfinding.isFinished);
 
+  const [open, setOpen] = useState(true);
+
   if (!isRunning && !isFinished) return null;
 
-  let msg   = '';
-  let color = 'text-gray-400';
+  let msg     = '';
+  let counter = 'Running…';
 
   if (isRunning) {
-    msg   = `${ALGO_LABEL[algorithm]} is searching…`;
-    color = 'text-indigo-400';
+    msg = `${ALGO_LABEL[algorithm]} is searching…`;
   } else if (visitedOrder) {
+    counter = `${currentFrame + 1} / ${totalFrames}`;
     if (currentFrame < visitedOrder.length) {
       const pos = visitedOrder[currentFrame];
-      msg   = `${ALGO_LABEL[algorithm]}: exploring (row ${pos.row}, col ${pos.col}) — step ${currentFrame + 1} of ${visitedOrder.length}`;
-      color = 'text-violet-400';
+      msg = `${ALGO_LABEL[algorithm]}: exploring (row ${pos.row}, col ${pos.col}) — step ${currentFrame + 1} of ${visitedOrder.length}`;
     } else if (pathPositions && pathPositions.length > 0) {
       const step = currentFrame - visitedOrder.length + 1;
-      msg   = `Path found — tracing step ${step} of ${pathPositions.length}`;
-      color = 'text-yellow-400';
+      msg = `Path found — tracing step ${step} of ${pathPositions.length}`;
     } else {
-      msg   = `Search complete — no path exists (explored ${visitedOrder.length} nodes)`;
-      color = 'text-rose-400';
+      msg = `Search complete — no path exists (explored ${visitedOrder.length} nodes)`;
     }
   }
 
   return (
-    <div className="w-full bg-gray-900/60 border-b border-gray-800/60 px-6 py-1.5 text-xs font-mono shrink-0">
-      <span className={color}>{msg}</span>
+    <div className="absolute right-0 bottom-4 flex items-end z-20">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-6 py-3 flex items-center justify-center bg-gray-900/80 border border-r-0 border-gray-700 rounded-l-md text-gray-500 hover:text-white hover:bg-gray-800 transition-colors text-sm backdrop-blur-sm"
+        title={open ? 'Collapse' : 'Expand'}
+      >
+        {open ? '›' : '‹'}
+      </button>
+
+      {open && (
+        <div className="w-80 border border-gray-700 bg-gray-900/95 backdrop-blur-sm rounded-l-lg overflow-hidden shadow-2xl">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-gray-500 uppercase tracking-wider">Current step</span>
+              <span className="text-xs font-mono text-gray-500">{counter}</span>
+            </div>
+            <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-lg p-3 text-yellow-100 text-sm leading-relaxed">
+              {msg}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

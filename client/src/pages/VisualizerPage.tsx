@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import Grid          from '@/components/Grid/Grid';
 import ControlsPanel from '@/components/Controls/ControlsPanel';
 import { StatsBar }  from '@/components/UI/StatsBar';
-import { PathfindingStepDescription } from '@/components/UI/StepDescription';
+import { PathfindingStepPanel } from '@/components/UI/StepDescription';
 import { Toast }     from '@/components/UI/Toast';
 import { PlaybackBar } from '@/components/UI/PlaybackBar';
 import { useVisualizer }   from '@/features/pathfinding/useVisualizer';
@@ -56,10 +56,10 @@ export default function VisualizerPage() {
       />
 
       <StatsBar />
-      <PathfindingStepDescription />
 
-      <main className="flex-1 flex items-center justify-center p-6 overflow-auto">
+      <main className="flex-1 relative flex items-center justify-center p-6 overflow-auto">
         <Grid />
+        <PathfindingStepPanel />
       </main>
 
       {showPlayback && (
