@@ -13,14 +13,9 @@ const ALGORITHMS: { value: AlgorithmType; label: string }[] = [
   { value: 'bfs',      label: 'BFS'      },
   { value: 'dfs',      label: 'DFS'      },
   { value: 'dijkstra', label: 'Dijkstra' },
-  { value: 'astar',    label: 'A*'       },
 ];
 
-const SPEEDS: { value: SpeedType; label: string }[] = [
-  { value: 'slow',   label: 'Slow'   },
-  { value: 'medium', label: 'Medium' },
-  { value: 'fast',   label: 'Fast'   },
-];
+const SPEEDS: SpeedType[] = [1, 2, 3, 4, 5, 6, 7];
 
 const DRAW_MODES: { value: DrawMode; label: string; activeClass: string }[] = [
   { value: 'wall',   label: 'Walls',   activeClass: 'bg-gray-500 text-white'  },
@@ -81,20 +76,20 @@ export default function ControlsPanel({ onVisualize, onStop, onGenerateMaze }: P
       <div className="flex items-center gap-2">
         <span className="text-xs text-gray-500 uppercase tracking-wider mr-1">Speed</span>
         <div className="flex rounded-md overflow-hidden border border-gray-700">
-          {SPEEDS.map(({ value, label }) => (
+          {SPEEDS.map((value) => (
             <button
               key={value}
               disabled={disabled}
               onClick={() => dispatch(setSpeed(value))}
               className={`
-                px-3 py-1.5 text-sm font-medium transition-colors
+                px-2.5 py-1.5 text-sm font-medium transition-colors
                 ${speed === value
                   ? 'bg-indigo-500 text-white'
                   : 'text-gray-400 hover:text-white hover:bg-gray-700'}
                 ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}
               `}
             >
-              {label}
+              {value}×
             </button>
           ))}
         </div>

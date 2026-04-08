@@ -5,7 +5,6 @@ const ALGO_LABEL: Record<AlgorithmType, string> = {
   bfs:      'BFS',
   dfs:      'DFS',
   dijkstra: "Dijkstra's",
-  astar:    'A*',
 };
 
 export function StatsBar() {

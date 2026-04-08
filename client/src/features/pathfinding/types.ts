@@ -1,6 +1,6 @@
 export type NodeType = 'empty' | 'start' | 'end' | 'wall' | 'weight' | 'visited' | 'path';
-export type AlgorithmType = 'bfs' | 'dfs' | 'dijkstra' | 'astar';
-export type SpeedType = 'slow' | 'medium' | 'fast';
+export type AlgorithmType = 'bfs' | 'dfs' | 'dijkstra';
+export type SpeedType = number; // 1–7
 export type DrawMode = 'wall' | 'weight';
 
 export interface Position {
@@ -23,8 +23,4 @@ export interface RunStats {
   found: boolean;
 }
 
-export const SPEED_DELAY_MS: Record<SpeedType, number> = {
-  slow: 80,
-  medium: 25,
-  fast: 5,
-};
+export const PATH_BASE_MS = 40; // delay at 1×; divided by speed for higher multipliers

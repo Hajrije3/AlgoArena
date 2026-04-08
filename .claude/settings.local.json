@@ -8,7 +8,9 @@
       "Bash(node --check src/models/User.js)",
       "Bash(node --check src/models/Run.js)",
       "Bash(node --check src/middleware/auth.js)",
-      "Bash(timeout 15 node -e ':*)"
+      "Bash(timeout 15 node -e ':*)",
+      "WebSearch",
+      "WebFetch(domain:visualgo.net)"
     ]
   }
 }

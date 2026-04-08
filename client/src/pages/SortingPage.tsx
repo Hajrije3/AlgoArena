@@ -1,15 +1,19 @@
 import { Link } from 'react-router-dom';
-import { SortingBars }     from '@/components/Sorting/SortingBars';
-import { SortingControls } from '@/components/Sorting/SortingControls';
+import { SortingBars }            from '@/components/Sorting/SortingBars';
+import { SortingControls }         from '@/components/Sorting/SortingControls';
+import { SortingStepPanel } from '@/components/UI/StepDescription';
 import { PlaybackBar }     from '@/components/UI/PlaybackBar';
+import { Toast }           from '@/components/UI/Toast';
+import { useToast }        from '@/hooks/useToast';
 import { useSorter }        from '@/features/sorting/useSorter';
 import { usePlayback }      from '@/hooks/usePlayback';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { shuffleBars, seekToFrame } from '@/features/sorting/sortingSlice';
-import { BAR_COUNT, BAR_MIN, BAR_MAX, SORT_SPEED_MS } from '@/features/sorting/types';
 
-function makeRandomValues() {
-  return Array.from({ length: BAR_COUNT }, () =>
+import { BAR_MIN, BAR_MAX, SORT_BASE_MS } from '@/features/sorting/types';
+
+function makeRandomValues(count: number) {
+  return Array.from({ length: count }, () =>
     BAR_MIN + Math.floor(Math.random() * (BAR_MAX - BAR_MIN + 1)),
   );
 }
@@ -20,7 +24,9 @@ export default function SortingPage() {
   const isRunning   = useAppSelector((s) => s.sorting.isRunning);
   const frames      = useAppSelector((s) => s.sorting.frames);
   const speed       = useAppSelector((s) => s.sorting.speed);
+  const barCount    = useAppSelector((s) => s.sorting.barCount);
   const { sort, stop } = useSorter();
+  const { toasts, showToast, dismiss } = useToast();
 
   const totalFrames  = frames?.length ?? 0;
   const showPlayback = isComplete && !isRunning && totalFrames > 0;
@@ -28,11 +34,11 @@ export default function SortingPage() {
   const playback = usePlayback(
     showPlayback ? totalFrames : 0,
     (f) => { if (showPlayback) dispatch(seekToFrame(f)); },
-    SORT_SPEED_MS[speed],
+    Math.round(SORT_BASE_MS / speed),
   );
 
   function handleShuffle() {
-    dispatch(shuffleBars(makeRandomValues()));
+    dispatch(shuffleBars(makeRandomValues(barCount)));
   }
 
   return (
@@ -48,32 +54,38 @@ export default function SortingPage() {
         <span className="text-gray-500 text-sm">Sorting Visualizer</span>
       </header>
 
-      <SortingControls onSort={sort} onStop={stop} onShuffle={handleShuffle} />
+      <SortingControls onSort={sort} onStop={stop} onShuffle={handleShuffle} onToast={showToast} />
 
-      <main className="flex-1 flex flex-col items-center justify-center px-8 py-6 gap-4">
-        <div className="w-full max-w-5xl">
-          <SortingBars />
+      <main className="flex-1 relative overflow-hidden">
+        {/* Visualization */}
+        <div className="w-full h-full flex flex-col items-center justify-center px-8 py-6 gap-4">
+          <div className="w-full max-w-5xl">
+            <SortingBars />
+          </div>
+
+          <div className="flex items-center gap-5 text-xs text-gray-500">
+            {[
+              { label: 'Unsorted',  cls: 'bg-indigo-500'  },
+              { label: 'Comparing', cls: 'bg-yellow-400'  },
+              { label: 'Swapping',  cls: 'bg-rose-500'    },
+              { label: 'Sorted',    cls: 'bg-emerald-400' },
+            ].map(({ label, cls }) => (
+              <span key={label} className="flex items-center gap-1.5">
+                <span className={`w-3 h-3 rounded-sm ${cls}`} />
+                {label}
+              </span>
+            ))}
+          </div>
+
+          {isComplete && (
+            <p className="text-emerald-400 text-sm font-medium animate-pulse">
+              ✓ Sorted!
+            </p>
+          )}
         </div>
 
-        <div className="flex items-center gap-5 text-xs text-gray-500">
-          {[
-            { label: 'Unsorted',   cls: 'bg-indigo-500'  },
-            { label: 'Comparing',  cls: 'bg-yellow-400'  },
-            { label: 'Swapping',   cls: 'bg-rose-500'    },
-            { label: 'Sorted',     cls: 'bg-emerald-400' },
-          ].map(({ label, cls }) => (
-            <span key={label} className="flex items-center gap-1.5">
-              <span className={`w-3 h-3 rounded-sm ${cls}`} />
-              {label}
-            </span>
-          ))}
-        </div>
-
-        {isComplete && (
-          <p className="text-emerald-400 text-sm font-medium animate-pulse">
-            ✓ Sorted!
-          </p>
-        )}
+        {/* Step description panel */}
+        <SortingStepPanel />
       </main>
 
       {showPlayback && (
@@ -90,6 +102,8 @@ export default function SortingPage() {
           onSeek={playback.seek}
         />
       )}
+
+      <Toast toasts={toasts} onDismiss={dismiss} />
     </div>
   );
 }

@@ -30,7 +30,7 @@ const initialState: SortingState = {
   swapping:   [],
   sorted:     [],
   algorithm:  'bubble',
-  speed:      'medium',
+  speed:      4,
   isRunning:  false,
   isComplete: false,
   barCount:   BAR_COUNT,
@@ -87,6 +87,18 @@ const sortingSlice = createSlice({
       state.currentFrame = action.payload.length - 1;
     },
 
+    setBarCount(state, action: PayloadAction<number>) {
+      state.barCount    = Math.min(50, Math.max(1, action.payload));
+      state.values      = generateValues(action.payload);
+      state.comparing   = [];
+      state.swapping    = [];
+      state.sorted      = [];
+      state.isRunning   = false;
+      state.isComplete  = false;
+      state.frames      = null;
+      state.currentFrame = 0;
+    },
+
     seekToFrame(state, action: PayloadAction<number>) {
       if (!state.frames) return;
       const f = Math.max(0, Math.min(action.payload, state.frames.length - 1));
@@ -105,6 +117,7 @@ export const {
   applyFrame,
   setAlgorithm,
   setSpeed,
+  setBarCount,
   setRunning,
   setComplete,
   storeFrames,

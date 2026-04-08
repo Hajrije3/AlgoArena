@@ -29,7 +29,7 @@ const initialState: PathfindingState = {
   startNode: { ...DEFAULT_START },
   endNode: { ...DEFAULT_END },
   algorithm: 'bfs',
-  speed: 'medium',
+  speed: 4,
   drawMode: 'wall',
   isRunning: false,
   isFinished: false,

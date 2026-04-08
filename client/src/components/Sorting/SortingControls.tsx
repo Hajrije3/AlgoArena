@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { setAlgorithm, setSpeed } from '@/features/sorting/sortingSlice';
+import { setAlgorithm, setSpeed, setBarCount } from '@/features/sorting/sortingSlice';
 import type { SortAlgorithm, SortSpeed } from '@/features/sorting/types';
 import { ALGO_INFO } from '@/features/sorting/types';
 
@@ -10,26 +11,50 @@ const ALGORITHMS: { value: SortAlgorithm; label: string }[] = [
   { value: 'merge',     label: 'Merge'     },
 ];
 
-const SPEEDS: { value: SortSpeed; label: string }[] = [
-  { value: 'slow',   label: 'Slow'   },
-  { value: 'medium', label: 'Medium' },
-  { value: 'fast',   label: 'Fast'   },
-];
+const SPEEDS: SortSpeed[] = [1, 2, 3, 4, 5, 6, 7];
 
 interface Props {
   onSort:    () => void;
   onStop:    () => void;
   onShuffle: () => void;
+  onToast:   (msg: string, type?: 'error' | 'info' | 'success') => void;
 }
 
-export function SortingControls({ onSort, onStop, onShuffle }: Props) {
+export function SortingControls({ onSort, onStop, onShuffle, onToast }: Props) {
   const dispatch    = useAppDispatch();
   const algorithm   = useAppSelector((s) => s.sorting.algorithm);
   const speed       = useAppSelector((s) => s.sorting.speed);
+  const barCount    = useAppSelector((s) => s.sorting.barCount);
   const isRunning   = useAppSelector((s) => s.sorting.isRunning);
   const isComplete  = useAppSelector((s) => s.sorting.isComplete);
 
+  const [inputVal, setInputVal] = useState(String(barCount));
+
   const disabled = isRunning;
+
+  function handleBarInput(raw: string) {
+    setInputVal(raw);
+    const n = parseInt(raw, 10);
+    if (isNaN(n)) return;
+    if (n < 1) {
+      onToast('Number of columns must be at least 1.', 'error');
+      setInputVal('1');
+      dispatch(setBarCount(1));
+    } else if (n > 50) {
+      onToast('Maximum number of columns is 50.', 'error');
+      setInputVal('50');
+      dispatch(setBarCount(50));
+    } else {
+      dispatch(setBarCount(n));
+    }
+  }
+
+  function handleBarBlur() {
+    const n = parseInt(inputVal, 10);
+    const clamped = isNaN(n) ? barCount : Math.min(50, Math.max(1, n));
+    setInputVal(String(clamped));
+    dispatch(setBarCount(clamped));
+  }
 
   return (
     <div className="w-full bg-gray-900 border-b border-gray-800 px-6 py-3 flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -59,23 +84,43 @@ export function SortingControls({ onSort, onStop, onShuffle }: Props) {
       <div className="flex items-center gap-2">
         <span className="text-xs text-gray-500 uppercase tracking-wider mr-1">Speed</span>
         <div className="flex rounded-md overflow-hidden border border-gray-700">
-          {SPEEDS.map(({ value, label }) => (
+          {SPEEDS.map((value) => (
             <button
               key={value}
               disabled={disabled}
               onClick={() => dispatch(setSpeed(value))}
               className={`
-                px-3 py-1.5 text-sm font-medium transition-colors
+                px-2.5 py-1.5 text-sm font-medium transition-colors
                 ${speed === value
                   ? 'bg-indigo-500 text-white'
                   : 'text-gray-400 hover:text-white hover:bg-gray-700'}
                 ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}
               `}
             >
-              {label}
+              {value}×
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-gray-500 uppercase tracking-wider mr-1">Bars</span>
+        <input
+          type="number"
+          min={1}
+          max={50}
+          value={inputVal}
+          disabled={disabled}
+          onChange={(e) => handleBarInput(e.target.value)}
+          onBlur={handleBarBlur}
+          className={`
+            w-16 px-2 py-1.5 text-sm text-center rounded-md
+            bg-gray-800 border border-gray-700 text-gray-300
+            focus:outline-none focus:border-indigo-500
+            [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
+            ${disabled ? 'opacity-40 cursor-not-allowed' : ''}
+          `}
+        />
       </div>
 
       <div className="h-6 w-px bg-gray-700 hidden sm:block" />

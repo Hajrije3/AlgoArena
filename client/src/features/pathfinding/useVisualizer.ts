@@ -4,7 +4,6 @@ import { store } from '@/app/store';
 import { bfs }      from './algorithms/bfs';
 import { dfs }      from './algorithms/dfs';
 import { dijkstra } from './algorithms/dijkstra';
-import { astar }    from './algorithms/astar';
 import {
   resetVisualization,
   setRunning,
@@ -14,7 +13,7 @@ import {
   markPath,
   storeRunResult,
 } from './pathfindingSlice';
-import { SPEED_DELAY_MS } from './types';
+import { PATH_BASE_MS } from './types';
 import { saveRun } from '@/services/api';
 
 export function useVisualizer() {
@@ -48,11 +47,10 @@ export function useVisualizer() {
     const result =
       algorithm === 'bfs'      ? bfs(grid, startNode, endNode)      :
       algorithm === 'dfs'      ? dfs(grid, startNode, endNode)      :
-      algorithm === 'dijkstra' ? dijkstra(grid, startNode, endNode) :
-                                 astar(grid, startNode, endNode);
+       dijkstra(grid, startNode, endNode) ;
 
     const { visitedOrder, path } = result;
-    const visitDelay = SPEED_DELAY_MS[speed];
+    const visitDelay = Math.round(PATH_BASE_MS / speed);
     const pathDelay  = visitDelay * 2.5;
     const startTime  = Date.now();
 

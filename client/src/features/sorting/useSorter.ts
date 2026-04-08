@@ -5,7 +5,7 @@ import { selectionSort } from './algorithms/selectionSort';
 import { insertionSort } from './algorithms/insertionSort';
 import { mergeSort }     from './algorithms/mergeSort';
 import { applyFrame, setRunning, setComplete, storeFrames } from './sortingSlice';
-import { SORT_SPEED_MS } from './types';
+import { SORT_BASE_MS } from './types';
 import { saveRun } from '@/services/api';
 
 export function useSorter() {
@@ -38,7 +38,7 @@ export function useSorter() {
       algorithm === 'insertion' ? insertionSort(values) :
                                   mergeSort(values);
 
-    const delay = SORT_SPEED_MS[speed];
+    const delay = Math.round(SORT_BASE_MS / speed);
     const startTime = Date.now();
     const comparisons = frames.filter((f) => f.comparing.length > 0).length;
     const swaps = frames.filter((f) => f.swapping.length > 0).length;

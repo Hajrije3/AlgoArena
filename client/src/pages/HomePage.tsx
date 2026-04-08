@@ -62,16 +62,6 @@ export default function HomePage() {
           Interactive algorithm visualizations — see exactly how they work.
         </p>
       </div>
-
-      <div className="mb-6">
-        <Link
-          to="/leaderboard"
-          className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-indigo-400 transition-colors border border-gray-800 hover:border-indigo-500/40 px-4 py-2 rounded-lg"
-        >
-          🏆 View Leaderboard
-        </Link>
-      </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
         {FEATURES.map(({ to, title, accent, border, cta, ctaCls, description, tags, preview }) => (
           <div

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import Grid          from '@/components/Grid/Grid';
 import ControlsPanel from '@/components/Controls/ControlsPanel';
 import { StatsBar }  from '@/components/UI/StatsBar';
+import { PathfindingStepDescription } from '@/components/UI/StepDescription';
 import { Toast }     from '@/components/UI/Toast';
 import { PlaybackBar } from '@/components/UI/PlaybackBar';
 import { useVisualizer }   from '@/features/pathfinding/useVisualizer';
@@ -10,7 +11,7 @@ import { useToast }         from '@/hooks/useToast';
 import { usePlayback }      from '@/hooks/usePlayback';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { seekToFrame } from '@/features/pathfinding/pathfindingSlice';
-import { SPEED_DELAY_MS } from '@/features/pathfinding/types';
+import { PATH_BASE_MS } from '@/features/pathfinding/types';
 
 export default function VisualizerPage() {
   const dispatch = useAppDispatch();
@@ -28,7 +29,7 @@ export default function VisualizerPage() {
   const playback = usePlayback(
     showPlayback ? totalFrames : 0,
     (f) => { if (showPlayback) dispatch(seekToFrame(f)); },
-    SPEED_DELAY_MS[speed],
+    Math.round(PATH_BASE_MS / speed),
   );
 
   function handleVisualize() {
@@ -55,6 +56,7 @@ export default function VisualizerPage() {
       />
 
       <StatsBar />
+      <PathfindingStepDescription />
 
       <main className="flex-1 flex items-center justify-center p-6 overflow-auto">
         <Grid />

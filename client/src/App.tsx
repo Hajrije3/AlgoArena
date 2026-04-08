@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage        from '@/pages/HomePage';
 import VisualizerPage  from '@/pages/VisualizerPage';
 import SortingPage     from '@/pages/SortingPage';
-import LeaderboardPage from '@/pages/LeaderboardPage';
+import NotFoundPage    from '@/pages/NotFoundPage';
 
 export default function App() {
   return (
@@ -11,7 +11,7 @@ export default function App() {
         <Route path="/"            element={<HomePage />}        />
         <Route path="/visualizer"  element={<VisualizerPage />}  />
         <Route path="/sorting"     element={<SortingPage />}     />
-        <Route path="/leaderboard" element={<LeaderboardPage />} />
+        <Route path="*"            element={<NotFoundPage />}    />
       </Routes>
     </BrowserRouter>
   );
