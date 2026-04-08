@@ -18,9 +18,11 @@ export interface SortingRunPayload {
 
 export type SaveRunPayload = PathfindingRunPayload | SortingRunPayload;
 
+const API_BASE = import.meta.env.VITE_API_URL ?? '';
+
 export async function saveRun(payload: SaveRunPayload): Promise<void> {
   try {
-    await fetch('/api/runs', {
+    await fetch(`${API_BASE}/api/runs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
