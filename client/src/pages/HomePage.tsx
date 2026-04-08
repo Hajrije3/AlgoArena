@@ -1,5 +1,83 @@
 import { Link } from 'react-router-dom';
 
+// ─── Pathfinding grid preview ─────────────────────────────────────────────────
+// 10 cols × 6 rows — shows start, end, walls, visited nodes, and the path
+
+const GRID_CELLS = [
+  'S', '.', '.', 'V', 'W', '.', '.', '.', '.', '.',
+  'P', 'V', '.', 'V', 'W', 'V', '.', '.', '.', '.',
+  'P', 'P', 'P', 'P', 'P', 'P', 'V', '.', '.', '.',
+  '.', '.', '.', 'V', 'W', 'P', 'V', '.', '.', '.',
+  '.', '.', '.', '.', 'W', 'P', 'P', 'V', '.', '.',
+  '.', '.', '.', '.', 'W', '.', 'P', 'P', 'E', '.',
+];
+
+const CELL_COLOR: Record<string, string> = {
+  '.': '#111827',
+  'W': '#4b5563',
+  'V': '#5b21b6',
+  'P': '#fde047',
+  'S': '#34d399',
+  'E': '#f87171',
+};
+
+function PathfindingPreview() {
+  return (
+    <div
+      className="w-full rounded overflow-hidden"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(10, 1fr)',
+        gridTemplateRows: 'repeat(6, 1fr)',
+        gap: '2px',
+        height: '80px',
+      }}
+    >
+      {GRID_CELLS.map((cell, i) => (
+        <div
+          key={i}
+          className="rounded-sm"
+          style={{ background: CELL_COLOR[cell] }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Sorting bars preview ─────────────────────────────────────────────────────
+// Shows a bubble sort mid-run: sorted (green) | comparing (yellow) | unsorted (indigo)
+
+const SORT_BARS = [
+  { h: 12, c: '#34d399' },
+  { h: 22, c: '#34d399' },
+  { h: 34, c: '#34d399' },
+  { h: 45, c: '#34d399' },
+  { h: 55, c: '#34d399' },
+  { h: 72, c: '#fbbf24' },
+  { h: 63, c: '#fbbf24' },
+  { h: 80, c: '#6366f1' },
+  { h: 91, c: '#6366f1' },
+  { h: 68, c: '#6366f1' },
+  { h: 85, c: '#6366f1' },
+  { h: 50, c: '#6366f1' },
+];
+
+function SortingPreview() {
+  return (
+    <div className="flex items-end gap-0.5 w-full h-20">
+      {SORT_BARS.map(({ h, c }, i) => (
+        <div
+          key={i}
+          className="flex-1 rounded-t-sm"
+          style={{ height: `${h}%`, background: c }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Feature cards ────────────────────────────────────────────────────────────
+
 const FEATURES = [
   {
     to:          '/visualizer',
@@ -10,20 +88,7 @@ const FEATURES = [
     ctaCls:      'bg-indigo-500 hover:bg-indigo-400',
     description: 'Watch BFS, DFS, and Dijkstra explore a grid in real time.',
     tags:        ['BFS', 'DFS', 'Dijkstra', 'Weighted nodes', 'Maze generator'],
-    preview: (
-      <div className="flex items-end gap-1 h-10">
-        {[4, 7, 5, 9, 3, 8, 6, 10, 2, 7].map((h, i) => (
-          <div
-            key={i}
-            className="w-3 rounded-sm"
-            style={{
-              height: `${h * 10}%`,
-              background: i < 5 ? '#6366f1' : i < 8 ? '#7c3aed' : '#fde047',
-            }}
-          />
-        ))}
-      </div>
-    ),
+    preview:     <PathfindingPreview />,
   },
   {
     to:          '/sorting',
@@ -32,22 +97,9 @@ const FEATURES = [
     border:      'border-emerald-500/20 hover:border-emerald-500/50',
     cta:         'Open Sorter',
     ctaCls:      'bg-emerald-500 hover:bg-emerald-400',
-    description: 'Compare Bubble, Selection, and Insertion sort step by step.',
-    tags:        ['Bubble Sort', 'Selection Sort', 'Insertion Sort', 'Live animation'],
-    preview: (
-      <div className="flex items-end gap-0.5 h-10">
-        {[3, 7, 2, 9, 1, 8, 4, 6, 5, 10].map((h, i) => (
-          <div
-            key={i}
-            className="flex-1 rounded-t-sm"
-            style={{
-              height: `${h * 10}%`,
-              background: i < 3 ? '#34d399' : i < 5 ? '#fbbf24' : '#6366f1',
-            }}
-          />
-        ))}
-      </div>
-    ),
+    description: 'Compare Bubble, Selection, Insertion, and Merge sort step by step.',
+    tags:        ['Bubble Sort', 'Selection Sort', 'Insertion Sort', 'Merge Sort', 'Live animation'],
+    preview:     <SortingPreview />,
   },
 ];
 
